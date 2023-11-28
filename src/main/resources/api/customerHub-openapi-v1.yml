@@ -3,7 +3,7 @@ info:
   version: '1.0.0'
   title: Customer Hub APIs
   description: |
-    This API contains endpoints that are used by Customer Hub application
+    This API serves as the backend for the Customer Hub application, providing endpoints for managing customer data.
 
 servers:
   - url: http://localhost:8080
@@ -13,8 +13,7 @@ paths:
 
   '/customers':
     post:
-      summary: |
-        Create a new customer in the system
+      summary: Create a new customer
       operationId: createNewCustomer
       tags:
         - 'CustomerCrud'
@@ -37,8 +36,9 @@ paths:
           $ref: '#/components/responses/500'
         '503':
           $ref: '#/components/responses/503'
+
     get:
-      summary: return list of all customers
+      summary: Return a list of all customers
       operationId: listCustomers
       tags:
         - 'CustomerCrud'
@@ -47,7 +47,7 @@ paths:
         - $ref: '#/components/parameters/Size'
       responses:
         '200':
-          description: Returns Customer list
+          description: Returns a list of customers
           content:
             application/json:
               schema:
@@ -81,9 +81,9 @@ paths:
           $ref: '#/components/responses/500'
         '503':
           $ref: '#/components/responses/503'
+
     put:
-      summary: |
-        update a customer
+      summary: Update customer details
       operationId: updateCustomer
       tags:
         - 'CustomerCrud'
@@ -97,7 +97,7 @@ paths:
               $ref: '#/components/schemas/CustomerRequest'
       responses:
         '200':
-          description: Returns Customer details
+          description: Returns updated Customer details
           content:
             application/json:
               schema:
@@ -110,8 +110,9 @@ paths:
           $ref: '#/components/responses/500'
         '503':
           $ref: '#/components/responses/503'
+
     delete:
-      summary: delete a customer
+      summary: Delete a customer
       operationId: deleteCustomer
       tags:
         - 'CustomerCrud'
@@ -131,16 +132,16 @@ paths:
 
   '/customers/find':
     get:
-      summary: find a customer by firstName , lastName
-      operationId: customerCrud
+      summary: Find customers by first name and/or last name
+      operationId: findCustomer
       tags:
-        - 'findCustomer'
+        - 'CustomerCrud'
       parameters:
         - $ref: "#/components/parameters/FirstName"
         - $ref: "#/components/parameters/LastName"
       responses:
         '200':
-          description: Returns Customer list
+          description: Returns a list of matching customers
           content:
             application/json:
               schema:
@@ -178,7 +179,7 @@ components:
     Page:
       name: page
       in: query
-      description: zero-based page index, must NOT be negative.
+      description: Zero-based page index, must not be negative.
       schema:
         type: integer
         format: int32
@@ -189,7 +190,7 @@ components:
     Size:
       in: query
       name: size
-      description: number of items in a page to be returned, must be greater than 0.
+      description: Number of items per page, must be greater than 0.
       schema:
         type: integer
         format: int32
@@ -212,7 +213,7 @@ components:
 
     ErrorBodyIsMissed:
       type: object
-      title: Error Body Is Missed
+      title: Error Body Is Missing
       properties:
         message:
           type: string
@@ -236,7 +237,7 @@ components:
 
     CustomerRequest:
       type: object
-      description: Object containing data to create a customer. firstName+lastName should be uniquie
+      description: Data for creating or updating a customer. FirstName and LastName should be unique.
       required:
         - firstName
         - lastName
@@ -267,11 +268,10 @@ components:
         created:
           type: string
           format: date-time
-          description: the creation time of the customer in UTC
+          description: The creation time of the customer in UTC
         updated:
           type: string
           format: date-time
-          description: the creation time of the customer in UTC
 
     CustomerListResponse:
       type: object

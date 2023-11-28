@@ -1,5 +1,6 @@
 package ad.lotfiz.assignment.customerhub.controller;
 
+import ad.lotfiz.assignment.customerhub.service.CustomerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import nl.customerhub.api.v1.CustomerCrudApi;
@@ -15,18 +16,24 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @Validated
 public class CustomerController implements CustomerCrudApi {
+
+    private final CustomerService customerService;
+
     @Override
     public ResponseEntity<CustomerResponse> createNewCustomer(CustomerRequest customerRequest) {
-        return CustomerCrudApi.super.createNewCustomer(customerRequest);
+        log.info("Request to create customer {}", customerRequest);
+
+        CustomerResponse response = customerService.createNewCustomer(customerRequest);
+        return ResponseEntity.ok(response);
     }
 
     @Override
-    public ResponseEntity<Void> deleteCustomer(Long customerId) {
+    public ResponseEntity<Void> deleteCustomer(String customerId) {
         return CustomerCrudApi.super.deleteCustomer(customerId);
     }
 
     @Override
-    public ResponseEntity<CustomerResponse> getCustomer(Long customerId) {
+    public ResponseEntity<CustomerResponse> getCustomer(String customerId) {
         return CustomerCrudApi.super.getCustomer(customerId);
     }
 
@@ -36,7 +43,7 @@ public class CustomerController implements CustomerCrudApi {
     }
 
     @Override
-    public ResponseEntity<CustomerResponse> updateCustomer(Long customerId, CustomerRequest customerRequest) {
+    public ResponseEntity<CustomerResponse> updateCustomer(String customerId, CustomerRequest customerRequest) {
         return CustomerCrudApi.super.updateCustomer(customerId, customerRequest);
     }
 }
