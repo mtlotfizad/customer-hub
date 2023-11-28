@@ -80,5 +80,20 @@ public class CustomerControllerTest {
         verify(customerService, times(1)).createNewCustomer(any(CustomerRequest.class));
     }
 
+    @Test
+    void testHandleIllegalArgumentException() throws Exception {
+        // Given
+        String invalidUuid = "not_a_valid_uuid";
+
+        // Mocking the behavior of CustomerService to throw an IllegalArgumentException
+        when(customerService.fetchCustomer(invalidUuid))
+                .thenThrow(new IllegalArgumentException("Invalid UUID string: not_a_valid_uuid"));
+
+        // When
+        mockMvc.perform(MockMvcRequestBuilders.get("/customers/{customerId}", invalidUuid))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Invalid UUID string: not_a_valid_uuid"));
+
+    }
 
 }

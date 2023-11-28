@@ -98,6 +98,60 @@ public class CustomerServiceTest {
         verify(customerRepository, never()).delete(any(CustomerEntity.class));
     }
 
+    @Test
+    void testFetchCustomer() {
+        // Given
+        CustomerEntity mockedEntity = getMockedEntity();
+        when(customerRepository.findById(any(UUID.class))).thenReturn(Optional.of(mockedEntity));
+        CustomerResponse customerResponse = getMockedResponse(mockedEntity);
+        when(customerMapper.mapFromCustomerEntity(mockedEntity)).thenReturn(customerResponse);
+
+        // When
+        String uuid = mockedEntity.getId().toString();
+        CustomerResponse result = customerService.fetchCustomer(uuid);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(uuid, result.getId());
+        assertEquals("John", result.getFirstName());
+        assertEquals("Doe", result.getLastName());
+        assertEquals(25, result.getAge());
+        assertEquals("123 Main St", result.getAddress());
+        assertEquals("john.doe@example.com", result.getEmail());
+
+        // Verify that the repository's findById method was called with the correct argument
+        verify(customerRepository, times(1)).findById(any(UUID.class));
+    }
+
+    @Test
+    void testFetchCustomer_customer_not_found() {
+        // Given
+        String customerId = UUID.randomUUID().toString();
+        when(customerRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
+
+        // When and Then
+        assertThrows(CustomerNotFoundException.class, () -> customerService.fetchCustomer(customerId));
+
+        // Verify that the repository's findById method was called with the correct argument
+        verify(customerRepository, times(1)).findById(any(UUID.class));
+    }
+
+    @Test
+    void testFetchOrThrow_invalid_uuid() {
+        // Given
+        String invalidUuid = "not_a_valid_uuid";
+
+        // When and Then
+        IllegalArgumentException thrownException = assertThrows(IllegalArgumentException.class,
+                () -> customerService.delete(invalidUuid));
+
+        // Verify the exception message
+        assertEquals("Invalid UUID string: not_a_valid_uuid", thrownException.getMessage());
+
+        // Verify that the repository's findById method is not called in case of exception
+        verify(customerRepository, never()).findById(any(UUID.class));
+    }
+
     private static CustomerEntity getMockedEntity() {
         UUID id = UUID.randomUUID();
         return new CustomerEntity(id, "John", "Doe", 25, "123 Main St", "john.doe@example.com");

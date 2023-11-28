@@ -33,13 +33,15 @@ public class CustomerController implements CustomerCrudApi {
     @Override
     public ResponseEntity<Void> deleteCustomer(String customerId) {
         log.info("Request to delete a customer {}", customerId);
-    customerService.delete(customerId);
+        customerService.delete(customerId);
         return ResponseEntity.noContent().build();
     }
 
     @Override
     public ResponseEntity<CustomerResponse> getCustomer(String customerId) {
-        return CustomerCrudApi.super.getCustomer(customerId);
+        log.info("Request to get details of a customer {}", customerId);
+        CustomerResponse customerResponse = customerService.fetchCustomer(customerId);
+        return ResponseEntity.ok(customerResponse);
     }
 
     @Override

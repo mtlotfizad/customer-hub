@@ -37,11 +37,13 @@ public class CustomerService {
         customerRepository.delete(fetchOrThrow(customerId));
     }
 
+    public CustomerResponse fetchCustomer(String uuid) {
+        return customerMapper.mapFromCustomerEntity(fetchOrThrow(uuid));
+    }
+
     private CustomerEntity fetchOrThrow(String id) {
-        UUID uuid = UUID.fromString(id); // todo: IllegalArgumentException
+        UUID uuid = UUID.fromString(id);
         return customerRepository.findById(uuid)
                 .orElseThrow(() -> new CustomerNotFoundException(String.format("Customer %s not found", id)));
     }
-
-
 }
