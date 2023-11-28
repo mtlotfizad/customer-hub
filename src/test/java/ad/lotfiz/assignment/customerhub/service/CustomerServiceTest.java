@@ -33,7 +33,7 @@ public class CustomerServiceTest {
     private CustomerService customerService;
 
     @Test
-    void testCreateNewCustomer() {
+    void testCreateNewCustomer_happy_flow() {
         // Given
         CustomerRequest customerRequest = new CustomerRequest("John", "Doe").age(25).address("123 Main St").email("john.doe@example.com");
         UUID id = UUID.randomUUID();

@@ -32,6 +32,8 @@ paths:
                 $ref: '#/components/schemas/CustomerResponse'
         '400':
           $ref: '#/components/responses/400'
+        '422':
+          $ref: '#/components/responses/422'
         '500':
           $ref: '#/components/responses/500'
         '503':
@@ -235,6 +237,14 @@ components:
           type: string
           description: Error message
 
+    DuplicateError:
+      type: object
+      title: Duplicate record is inserted
+      properties:
+        message:
+          type: string
+          description: Error message
+
     CustomerRequest:
       type: object
       description: Data for creating or updating a customer. FirstName and LastName should be unique.
@@ -316,6 +326,13 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/NotFoundError"
+    422:
+      description: |-
+        duplicate insertion of firstName and lastName
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/DuplicateError"
     500:
       description: |-
         * `TECHNICAL_ERROR` - technical error
