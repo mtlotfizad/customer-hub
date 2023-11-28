@@ -10,6 +10,9 @@ import nl.customerhub.api.v1.model.CustomerResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import java.net.URI;
 
 @RestController
 @RequiredArgsConstructor
@@ -22,14 +25,16 @@ public class CustomerController implements CustomerCrudApi {
     @Override
     public ResponseEntity<CustomerResponse> createNewCustomer(CustomerRequest customerRequest) {
         log.info("Request to create customer {}", customerRequest);
-
         CustomerResponse response = customerService.createNewCustomer(customerRequest);
-        return ResponseEntity.ok(response);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(response.getId()).toUri();
+        return ResponseEntity.created(location).body(response);
     }
 
     @Override
     public ResponseEntity<Void> deleteCustomer(String customerId) {
-        return CustomerCrudApi.super.deleteCustomer(customerId);
+        log.info("Request to delete a customer {}", customerId);
+    customerService.delete(customerId);
+        return ResponseEntity.noContent().build();
     }
 
     @Override

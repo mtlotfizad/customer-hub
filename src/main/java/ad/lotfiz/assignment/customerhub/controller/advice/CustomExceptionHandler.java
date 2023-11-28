@@ -1,6 +1,7 @@
-package ad.lotfiz.assignment.customerhub.controller.exception;
+package ad.lotfiz.assignment.customerhub.controller.advice;
 
 
+import ad.lotfiz.assignment.customerhub.exception.CustomerNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import nl.customerhub.api.v1.model.DuplicateError;
@@ -19,9 +20,17 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<DuplicateError> handleException(DataIntegrityViolationException ex) {
-        log.debug("Article service encounter an exception", ex);
+        log.debug("customer service encounter an exception", ex);
 
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(new DuplicateError().message(ex.getMessage()));
+    }
+
+    @ExceptionHandler(CustomerNotFoundException.class)
+    public ResponseEntity<DuplicateError> handleException(CustomerNotFoundException ex) {
+        log.debug("customer service encounter an exception", ex);
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new DuplicateError().message(ex.getMessage()));
     }
 

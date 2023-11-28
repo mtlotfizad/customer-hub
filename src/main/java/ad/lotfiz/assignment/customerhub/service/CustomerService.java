@@ -1,5 +1,6 @@
 package ad.lotfiz.assignment.customerhub.service;
 
+import ad.lotfiz.assignment.customerhub.exception.CustomerNotFoundException;
 import ad.lotfiz.assignment.customerhub.model.CustomerEntity;
 import ad.lotfiz.assignment.customerhub.repository.CustomerRepository;
 import ad.lotfiz.assignment.customerhub.service.mapper.CustomerMapper;
@@ -9,6 +10,8 @@ import nl.customerhub.api.v1.model.CustomerRequest;
 import nl.customerhub.api.v1.model.CustomerResponse;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -29,4 +32,16 @@ public class CustomerService {
             throw e;
         }
     }
+
+    public void delete(String customerId) {
+        customerRepository.delete(fetchOrThrow(customerId));
+    }
+
+    private CustomerEntity fetchOrThrow(String id) {
+        UUID uuid = UUID.fromString(id); // todo: IllegalArgumentException
+        return customerRepository.findById(uuid)
+                .orElseThrow(() -> new CustomerNotFoundException(String.format("Customer %s not found", id)));
+    }
+
+
 }
