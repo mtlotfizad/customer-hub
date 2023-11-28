@@ -160,10 +160,7 @@ components:
       in: path
       name: customerId
       schema:
-        type: integer
-        format: int64
-        minimum: 0
-        example: 5
+        type: string
       required: true
 
     FirstName:
@@ -266,8 +263,7 @@ components:
         - $ref: '#/components/schemas/CustomerRequest'
       properties:
         id:
-          type: integer
-          format: int64
+          type: string
         created:
           type: string
           format: date-time
