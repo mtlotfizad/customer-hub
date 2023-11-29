@@ -1,6 +1,25 @@
 # Customer Hub
 This is a demo project of to store and retrieve customers data.
 
+## Requirements
+As a product owner I would like to be able to maintain customer data with the following specification:
+
+* [Customer](src/main/java/ad/lotfiz/assignment/customerhub/model/CustomerEntity.java)'s data is consist of first-name, last-name, age, address and email.
+  * The combination of {first-name, last-name} is unique.
+  * Either address or email should be set.
+* I need some REST endpoints to 
+  * insert new user
+  * get a user by id
+  * delete a user
+  * update a user (only address and email)
+  * list all available users
+  * search users based on first-name and last-name
+* No security is required for the REST endpoints.
+* I need some monitoring metrics to know the performance of the system
+* The application needs to be production ready (dockerized, pipeline)
+* The application needs to be one go.
+* The application should be able to run locally.
+
 # Solution
 A JVM based backend application using REST that manages customer hub system.
 
