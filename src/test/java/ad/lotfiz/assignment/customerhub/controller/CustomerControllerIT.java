@@ -4,18 +4,25 @@ import ad.lotfiz.assignment.customerhub.model.CustomerEntity;
 import ad.lotfiz.assignment.customerhub.repository.CustomerRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.customerhub.api.v1.model.CustomerListResponse;
+import nl.customerhub.api.v1.model.CustomerRequest;
 import nl.customerhub.api.v1.model.CustomerResponse;
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -26,6 +33,7 @@ import static ad.lotfiz.assignment.customerhub.RandomGenerator.randomCustomerReq
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.springframework.test.util.AssertionErrors.assertTrue;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = "spring.profiles.active=test")
 public class CustomerControllerIT {
@@ -39,6 +47,10 @@ public class CustomerControllerIT {
     @Autowired
     private CustomerRepository customerRepository;
 
+    @BeforeEach
+    public void cleanUpDatabase() {
+        customerRepository.deleteAll();
+    }
 
     @Test
     @DisplayName("should create new Customer")
@@ -130,7 +142,6 @@ public class CustomerControllerIT {
         customerRepository.saveAll(customerEntities);
 
         //when
-
         ResponseEntity<CustomerListResponse> response =
                 restTemplate.getForEntity(CUSTOMERS_PATH + "?page=1&size=4", CustomerListResponse.class);
         //then
@@ -152,6 +163,74 @@ public class CustomerControllerIT {
             assertEquals(entity.getAddress(), customerResponse.getAddress());
             assertEquals(entity.getEmail(), customerResponse.getEmail());
         }
+    }
+
+    @Test
+    void testUpdateCustomer() {
+        // Given
+        CustomerEntity existingCustomer = randomCustomerEntity();
+        CustomerEntity entity = customerRepository.save(existingCustomer);
+        CustomerRequest updatedRequest = randomCustomerRequest();
+
+        // When
+        String url = String.format(ONE_CUSTOMER_PATH, entity.getId().toString());
+        ResponseEntity<CustomerResponse> response = putEntity(url, updatedRequest, CustomerResponse.class);
+
+        // Then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        CustomerResponse body = response.getBody();
+        assertNotNull(body);
+
+        Assertions.assertThat(body)
+                .usingRecursiveComparison()
+                .ignoringFieldsOfTypes(OffsetDateTime.class)
+                .ignoringFields("id")
+                .isEqualTo(updatedRequest);
+
+        OffsetDateTime currentTime = OffsetDateTime.now();
+        Duration acceptableTimeDifference = Duration.ofSeconds(5);
+        assertTrue("Updated time should be near the current time",
+                Math.abs(Duration.between(body.getUpdated(), currentTime).getSeconds()) <= acceptableTimeDifference.getSeconds());
+    }
+
+    @Test
+    void testFindCustomer() {
+        List<CustomerEntity> customerEntities = Arrays.asList(
+                randomCustomerEntity("John", "Doe"),
+                randomCustomerEntity("Jane", "Doe"),
+                randomCustomerEntity("Alice", "Smith")
+        );
+        customerRepository.saveAll(customerEntities);
+
+        // When
+        String lastNameToSearch = "Doe";
+        Pageable paging = PageRequest.of(0, 10);
+        String url = "/customers/find?lastName=" + lastNameToSearch + "&page=0&size=10";
+        ResponseEntity<CustomerListResponse> getResponse = restTemplate.getForEntity(url, CustomerListResponse.class);
+
+        // Then
+        assertThat(getResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        CustomerListResponse body = getResponse.getBody();
+        assertNotNull(body);
+        assertEquals(0, body.getPage());
+        assertEquals(10, body.getSize());
+        assertNotNull(body.getContent());
+        assertThat(body.getContent().size()).isEqualTo(2);
+        // Verify that the content matches the expected values
+        List<CustomerResponse> customerResponses = body.getContent();
+
+        Assertions.assertThat(body.getContent().get(0))
+                .usingRecursiveComparison()
+                .ignoringFieldsOfTypes(OffsetDateTime.class)
+                .ignoringFields("id")
+                .isEqualTo(customerEntities.get(0));
+
+        Assertions.assertThat(body.getContent().get(1))
+                .usingRecursiveComparison()
+                .ignoringFieldsOfTypes(OffsetDateTime.class)
+                .ignoringFields("id")
+                .isEqualTo(customerEntities.get(1));
+
     }
 
 

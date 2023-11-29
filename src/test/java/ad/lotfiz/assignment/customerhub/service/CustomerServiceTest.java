@@ -80,7 +80,6 @@ public class CustomerServiceTest {
     }
 
 
-
     @Test
     void testDeleteCustomer() {
         // Given
@@ -217,12 +216,12 @@ public class CustomerServiceTest {
 
         // Mocking the behavior of CustomerRepository
         List<CustomerEntity> mockedEntities = Arrays.asList(
-                randomCustomerEntity(firstName, lastName),
-                randomCustomerEntity(firstName + "1", lastName + "1"),
-                randomCustomerEntity(firstName + "2", lastName + "2")
+                randomCustomerEntity(firstName + "0", lastName),
+                randomCustomerEntity(firstName + "1", lastName),
+                randomCustomerEntity(firstName + "2", lastName)
         );
         Page<CustomerEntity> mockedPage = new PageImpl<>(mockedEntities, paging, mockedEntities.size());
-        when(customerRepository.findByFirstNameLikeAndLastNameLike(firstName, lastName, paging)).thenReturn(mockedPage);
+        when(customerRepository.findByFirstNameLikeAndLastNameLike(any(), any(), any())).thenReturn(mockedPage);
 
         // Mocking the behavior of CustomerMapper
         List<CustomerResponse> mockedResponses = mockedEntities
@@ -243,7 +242,8 @@ public class CustomerServiceTest {
         assertEquals(mockedResponses, result.getContent());
 
         // Verify that the repository's findByFirstNameAndLastName method was called with the correct arguments
-        verify(customerRepository, times(1)).findByFirstNameLikeAndLastNameLike(firstName, lastName, paging);
+        verify(customerRepository, times(1))
+                .findByFirstNameLikeAndLastNameLike("%" + firstName + "%", "%" + lastName + "%", paging);
 
         // Verify that the mapper's mapFromCustomerEntity method was called for each entity
         verify(customerMapper, times(mockedEntities.size())).mapFromCustomerEntity(any());
