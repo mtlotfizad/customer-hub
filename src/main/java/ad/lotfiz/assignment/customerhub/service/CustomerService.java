@@ -10,10 +10,13 @@ import nl.customerhub.api.v1.model.CustomerListResponse;
 import nl.customerhub.api.v1.model.CustomerRequest;
 import nl.customerhub.api.v1.model.CustomerResponse;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -45,15 +48,49 @@ public class CustomerService {
 
 
     public CustomerListResponse list(Pageable paging) {
-        return null;
+        log.debug("Request to list all Student of page {}", paging);
+
+        Page<CustomerEntity> all = customerRepository.findAll(paging);
+        CustomerListResponse response = new CustomerListResponse();
+        response.setContent(all.getContent().stream().map(customerMapper::mapFromCustomerEntity).collect(Collectors.toList()));
+        response.setPage(all.getNumber());
+        response.setSize(all.getSize());
+
+        return response;
     }
 
     public CustomerListResponse findByName(String firstName, String lastName, Pageable paging) {
-        return null;
+        Page<CustomerEntity> customerEntities = customerRepository.findByFirstNameAndLastName(firstName, lastName, paging);
+        List<CustomerResponse> customerResponses = customerEntities
+                .stream()
+                .map(customerMapper::mapFromCustomerEntity)
+                .collect(Collectors.toList());
+
+        return new CustomerListResponse(
+                customerEntities.getNumber(),
+                customerEntities.getSize(),
+                customerResponses
+        );
     }
 
     public CustomerResponse update(String customerId, CustomerRequest customerRequest) {
-        return null;
+        try {
+            CustomerEntity existingCustomer = fetchOrThrow(customerId);
+            updateCustomerEntity(existingCustomer, customerRequest);
+            CustomerEntity updatedCustomer = customerRepository.save(existingCustomer);
+            return customerMapper.mapFromCustomerEntity(updatedCustomer);
+        } catch (DataIntegrityViolationException e) {
+            log.error("Create customer failed: duplicate firstName, lastName? : {}", customerRequest, e);
+            throw e;
+        }
+    }
+
+    private void updateCustomerEntity(CustomerEntity customerEntity, CustomerRequest customerRequest) {
+        customerEntity.setFirstName(customerRequest.getFirstName());
+        customerEntity.setLastName(customerRequest.getLastName());
+        customerEntity.setAge(customerRequest.getAge());
+        customerEntity.setAddress(customerRequest.getAddress());
+        customerEntity.setEmail(customerRequest.getEmail());
     }
 
     private CustomerEntity fetchOrThrow(String id) {

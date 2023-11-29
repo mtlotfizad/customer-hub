@@ -1,5 +1,6 @@
 package ad.lotfiz.assignment.customerhub.controller;
 
+import ad.lotfiz.assignment.customerhub.RandomGenerator;
 import ad.lotfiz.assignment.customerhub.exception.CustomerNotFoundException;
 import ad.lotfiz.assignment.customerhub.service.CustomerService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,7 +23,6 @@ import java.util.Collections;
 import java.util.List;
 
 import static ad.lotfiz.assignment.customerhub.RandomGenerator.randomCustomerRequest;
-import static ad.lotfiz.assignment.customerhub.RandomGenerator.randomCustomerResponse;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doThrow;
@@ -48,7 +48,7 @@ public class CustomerControllerTest {
     void testCreateNewCustomer() throws Exception {
         // Given
         CustomerRequest request = randomCustomerRequest();
-        CustomerResponse expectedResponse = randomCustomerResponse(request);
+        CustomerResponse expectedResponse = RandomGenerator.mapRequestToResponse(request);
         String id = expectedResponse.getId();
         when(customerService.createNewCustomer(any(CustomerRequest.class))).thenReturn(expectedResponse);
 
@@ -166,7 +166,7 @@ public class CustomerControllerTest {
     @Test
     void testGetCustomer() throws Exception {
         // Given
-        CustomerResponse expectedResponse = randomCustomerResponse();
+        CustomerResponse expectedResponse = RandomGenerator.randomCustomerResponse();
         String customerId = expectedResponse.getId();
         when(customerService.fetchCustomer(customerId)).thenReturn(expectedResponse);
 
@@ -225,8 +225,8 @@ public class CustomerControllerTest {
         int page = 0;
         int size = 10;
 
-        CustomerResponse customerResponse1 = randomCustomerResponse();
-        CustomerResponse customerResponse2 = randomCustomerResponse();
+        CustomerResponse customerResponse1 = RandomGenerator.randomCustomerResponse();
+        CustomerResponse customerResponse2 = RandomGenerator.randomCustomerResponse();
         List<CustomerResponse> customerResponseList = Arrays.asList(customerResponse1, customerResponse2);
 
         when(customerService.list(any(Pageable.class))).thenReturn(new CustomerListResponse(page, size, customerResponseList));
@@ -261,7 +261,7 @@ public class CustomerControllerTest {
         // Given
         String customerId = "1";
         CustomerRequest updatedCustomerRequest = randomCustomerRequest();
-        CustomerResponse updatedCustomerResponse = randomCustomerResponse().id(customerId);
+        CustomerResponse updatedCustomerResponse = RandomGenerator.randomCustomerResponse().id(customerId);
         when(customerService.update(eq(customerId), any(CustomerRequest.class))).thenReturn(updatedCustomerResponse);
 
         // When
@@ -310,8 +310,8 @@ public class CustomerControllerTest {
         int page = 0;
         int size = 10;
 
-        CustomerResponse customerResponse1 = randomCustomerResponse().firstName(firstName).lastName(lastName);
-        CustomerResponse customerResponse2 = randomCustomerResponse().firstName(firstName + "1").lastName(lastName + "1");
+        CustomerResponse customerResponse1 = RandomGenerator.randomCustomerResponse().firstName(firstName).lastName(lastName);
+        CustomerResponse customerResponse2 = RandomGenerator.randomCustomerResponse().firstName(firstName + "1").lastName(lastName + "1");
         List<CustomerResponse> customerResponseList = Arrays.asList(customerResponse1, customerResponse2);
         when(customerService.findByName(eq(firstName), eq(lastName), any(Pageable.class))).thenReturn(new CustomerListResponse(page, size, customerResponseList));
 

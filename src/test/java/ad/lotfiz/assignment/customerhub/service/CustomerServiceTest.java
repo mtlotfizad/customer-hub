@@ -1,9 +1,11 @@
 package ad.lotfiz.assignment.customerhub.service;
 
+import ad.lotfiz.assignment.customerhub.RandomGenerator;
 import ad.lotfiz.assignment.customerhub.exception.CustomerNotFoundException;
 import ad.lotfiz.assignment.customerhub.model.CustomerEntity;
 import ad.lotfiz.assignment.customerhub.repository.CustomerRepository;
 import ad.lotfiz.assignment.customerhub.service.mapper.CustomerMapper;
+import nl.customerhub.api.v1.model.CustomerListResponse;
 import nl.customerhub.api.v1.model.CustomerRequest;
 import nl.customerhub.api.v1.model.CustomerResponse;
 import org.junit.jupiter.api.Test;
@@ -11,11 +13,20 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
-import java.time.OffsetDateTime;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+import static ad.lotfiz.assignment.customerhub.RandomGenerator.mapEntityToResponse;
+import static ad.lotfiz.assignment.customerhub.RandomGenerator.mapRequestToEntity;
 import static ad.lotfiz.assignment.customerhub.RandomGenerator.randomCustomerEntity;
 import static ad.lotfiz.assignment.customerhub.RandomGenerator.randomCustomerRequest;
 import static ad.lotfiz.assignment.customerhub.RandomGenerator.randomCustomerResponse;
@@ -44,8 +55,8 @@ public class CustomerServiceTest {
     void testCreateNewCustomer_happy_flow() {
         // Given
         CustomerRequest customerRequest = randomCustomerRequest();
-        CustomerEntity mockedEntity = randomCustomerEntity(customerRequest);
-        CustomerResponse customerResponse = randomCustomerResponse(mockedEntity);
+        CustomerEntity mockedEntity = RandomGenerator.mapRequestToEntity(customerRequest);
+        CustomerResponse customerResponse = RandomGenerator.mapEntityToResponse(mockedEntity);
         when(customerMapper.mapFromCustomerRequest(customerRequest)).thenReturn(mockedEntity);
         when(customerMapper.mapFromCustomerEntity(mockedEntity)).thenReturn(customerResponse);
         when(customerRepository.save(any(CustomerEntity.class))).thenReturn(mockedEntity);
@@ -105,7 +116,7 @@ public class CustomerServiceTest {
         // Given
         CustomerEntity mockedEntity = randomCustomerEntity();
         when(customerRepository.findById(any(UUID.class))).thenReturn(Optional.of(mockedEntity));
-        CustomerResponse customerResponse = randomCustomerResponse(mockedEntity);
+        CustomerResponse customerResponse = RandomGenerator.mapEntityToResponse(mockedEntity);
         when(customerMapper.mapFromCustomerEntity(mockedEntity)).thenReturn(customerResponse);
 
         // When
@@ -155,6 +166,146 @@ public class CustomerServiceTest {
     }
 
 
+    @Test
+    void testListCustomers() {
+        // Given
+        int page = 0;
+        int size = 10;
+        Pageable paging = PageRequest.of(page, size);
+
+        // Mocking the behavior of CustomerRepository
+        List<CustomerEntity> mockedEntities = Arrays.asList(
+                randomCustomerEntity(),
+                randomCustomerEntity(),
+                randomCustomerEntity()
+        );
+        Page<CustomerEntity> mockedPage = new PageImpl<>(mockedEntities, paging, mockedEntities.size());
+        when(customerRepository.findAll(paging)).thenReturn(mockedPage);
+
+        // Mocking the behavior of CustomerMapper
+        List<CustomerResponse> mockedResponses = mockedEntities
+                .stream()
+                .map(RandomGenerator::mapEntityToResponse)
+                .collect(Collectors.toList());
+        when(customerMapper.mapFromCustomerEntity(mockedEntities.get(0))).thenReturn(mockedResponses.get(0));
+        when(customerMapper.mapFromCustomerEntity(mockedEntities.get(1))).thenReturn(mockedResponses.get(1));
+        when(customerMapper.mapFromCustomerEntity(mockedEntities.get(2))).thenReturn(mockedResponses.get(2));
+
+        // When
+        CustomerListResponse result = customerService.list(paging);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(page, result.getPage());
+        assertEquals(size, result.getSize());
+        assertEquals(mockedResponses, result.getContent());
+
+        // Verify that the repository's findAll method was called with the correct argument
+        verify(customerRepository, times(1)).findAll(paging);
+
+        // Verify that the mapper's mapFromCustomerEntity method was called for each entity
+        verify(customerMapper, times(mockedEntities.size())).mapFromCustomerEntity(any());
+    }
+
+    @Test
+    void testFindCustomersByName() {
+        // Given
+        String firstName = "John";
+        String lastName = "Doe";
+        int page = 0;
+        int size = 10;
+        Pageable paging = PageRequest.of(page, size);
+
+        // Mocking the behavior of CustomerRepository
+        List<CustomerEntity> mockedEntities = Arrays.asList(
+                randomCustomerEntity(firstName, lastName),
+                randomCustomerEntity(firstName + "1", lastName + "1"),
+                randomCustomerEntity(firstName + "2", lastName + "2")
+        );
+        Page<CustomerEntity> mockedPage = new PageImpl<>(mockedEntities, paging, mockedEntities.size());
+        when(customerRepository.findByFirstNameAndLastName(firstName, lastName, paging)).thenReturn(mockedPage);
+
+        // Mocking the behavior of CustomerMapper
+        List<CustomerResponse> mockedResponses = mockedEntities
+                .stream()
+                .map(RandomGenerator::mapEntityToResponse)
+                .collect(Collectors.toList());
+        when(customerMapper.mapFromCustomerEntity(mockedEntities.get(0))).thenReturn(mockedResponses.get(0));
+        when(customerMapper.mapFromCustomerEntity(mockedEntities.get(1))).thenReturn(mockedResponses.get(1));
+        when(customerMapper.mapFromCustomerEntity(mockedEntities.get(2))).thenReturn(mockedResponses.get(2));
+
+        // When
+        CustomerListResponse result = customerService.findByName(firstName, lastName, paging);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(page, result.getPage());
+        assertEquals(size, result.getSize());
+        assertEquals(mockedResponses, result.getContent());
+
+        // Verify that the repository's findByFirstNameAndLastName method was called with the correct arguments
+        verify(customerRepository, times(1)).findByFirstNameAndLastName(firstName, lastName, paging);
+
+        // Verify that the mapper's mapFromCustomerEntity method was called for each entity
+        verify(customerMapper, times(mockedEntities.size())).mapFromCustomerEntity(any());
+    }
 
 
+    @Test
+    void testUpdateCustomer_happy_flow() {
+        // Given
+        CustomerRequest customerRequest = randomCustomerRequest();
+        CustomerEntity existingCustomer = randomCustomerEntity();
+        UUID customerId = existingCustomer.getId();
+        CustomerEntity updatedCustomer = mapRequestToEntity(customerRequest);
+        CustomerResponse expectedResponse = mapEntityToResponse(updatedCustomer);
+
+        when(customerRepository.findById(customerId)).thenReturn(Optional.of(existingCustomer));
+        when(customerRepository.save(any(CustomerEntity.class))).thenReturn(updatedCustomer);
+        when(customerMapper.mapFromCustomerEntity(updatedCustomer)).thenReturn(expectedResponse);
+
+        // When
+        CustomerResponse result = customerService.update(customerId.toString(), customerRequest);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(expectedResponse, result);
+
+        // Verify that the repository's save method was called with the correct argument
+        ArgumentCaptor<CustomerEntity> entityCaptor = ArgumentCaptor.forClass(CustomerEntity.class);
+        verify(customerRepository).save(entityCaptor.capture());
+        assertEquals(customerRequest.getFirstName(), entityCaptor.getValue().getFirstName());
+        assertEquals(customerRequest.getLastName(), entityCaptor.getValue().getLastName());
+
+        // Verify that the fetchOrThrow method was called with the correct argument
+        verify(customerRepository, times(1)).findById(customerId);
+    }
+
+    @Test
+    void testUpdateCustomer_duplicate_data_exception() {
+        // Given
+        UUID customerId = UUID.randomUUID();
+        CustomerRequest customerRequest = randomCustomerRequest();
+        CustomerEntity existingCustomer = randomCustomerEntity();
+
+        when(customerRepository.findById(customerId)).thenReturn(Optional.ofNullable(existingCustomer));
+        when(customerRepository.save(any(CustomerEntity.class)))
+                .thenThrow(new DataIntegrityViolationException("Duplicate entry"));
+
+        // When and Then
+        DataIntegrityViolationException thrownException = assertThrows(DataIntegrityViolationException.class,
+                () -> customerService.update(customerId.toString(), customerRequest));
+
+        // Verify the exception message
+        assertEquals("Duplicate entry", thrownException.getMessage());
+
+        // Verify that the fetchOrThrow method was called with the correct argument
+        verify(customerRepository, times(1)).findById(customerId);
+
+        // Verify that the repository's save method was called with the correct argument
+        ArgumentCaptor<CustomerEntity> entityCaptor = ArgumentCaptor.forClass(CustomerEntity.class);
+        verify(customerRepository).save(entityCaptor.capture());
+        assertEquals(customerRequest.getFirstName(), entityCaptor.getValue().getFirstName());
+        assertEquals(customerRequest.getLastName(), entityCaptor.getValue().getLastName());
+    }
 }

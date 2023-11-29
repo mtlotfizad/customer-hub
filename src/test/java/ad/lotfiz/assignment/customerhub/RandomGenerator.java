@@ -50,7 +50,7 @@ public class RandomGenerator {
                 .updated(OffsetDateTime.now());
     }
 
-    public static CustomerResponse randomCustomerResponse(CustomerRequest request) {
+    public static CustomerResponse mapRequestToResponse(CustomerRequest request) {
         return new CustomerResponse()
                 .id(UUID.randomUUID().toString())
                 .firstName(request.getFirstName())
@@ -62,7 +62,7 @@ public class RandomGenerator {
                 .updated(OffsetDateTime.now());
     }
 
-    public static CustomerResponse randomCustomerResponse(CustomerEntity entity) {
+    public static CustomerResponse mapEntityToResponse(CustomerEntity entity) {
         return new CustomerResponse()
                 .id(entity.getId().toString())
                 .firstName(entity.getFirstName())
@@ -83,7 +83,7 @@ public class RandomGenerator {
                 .email(randomEmail());
     }
 
-    public static CustomerEntity randomCustomerEntity(CustomerRequest request) {
+    public static CustomerEntity mapRequestToEntity(CustomerRequest request) {
         UUID id = UUID.randomUUID();
 
         return CustomerEntity.builder()
@@ -99,4 +99,10 @@ public class RandomGenerator {
 
     }
 
+    public static CustomerEntity randomCustomerEntity(String firstName, String lastName) {
+        CustomerEntity customerEntity = randomCustomerEntity();
+        customerEntity.setFirstName(firstName);
+        customerEntity.setLastName(lastName);
+        return customerEntity;
+    }
 }
