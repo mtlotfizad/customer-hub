@@ -7,6 +7,8 @@ import nl.customerhub.api.v1.CustomerCrudApi;
 import nl.customerhub.api.v1.model.CustomerListResponse;
 import nl.customerhub.api.v1.model.CustomerRequest;
 import nl.customerhub.api.v1.model.CustomerResponse;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
@@ -46,11 +48,22 @@ public class CustomerController implements CustomerCrudApi {
 
     @Override
     public ResponseEntity<CustomerListResponse> listCustomers(Integer page, Integer size) {
-        return CustomerCrudApi.super.listCustomers(page, size);
+        Pageable paging = PageRequest.of(page, size);
+        log.info("Request to get list of customers {}", paging);
+        return ResponseEntity.ok(customerService.list(paging));
     }
 
     @Override
     public ResponseEntity<CustomerResponse> updateCustomer(String customerId, CustomerRequest customerRequest) {
-        return CustomerCrudApi.super.updateCustomer(customerId, customerRequest);
+        log.info("updating the customer id {} with {}", customerId, customerRequest);
+        CustomerResponse response = customerService.update(customerId, customerRequest);
+        return ResponseEntity.ok(response);
+    }
+
+    @Override
+    public ResponseEntity<CustomerListResponse> findCustomer(String firstName, String lastName) {
+        log.info("find a list of customer firstName: {} lastName {}", firstName, lastName);
+        Pageable paging = customerService.findByName(firstName, lastName);
+        return ResponseEntity.ok(customerService.list(paging));
     }
 }
