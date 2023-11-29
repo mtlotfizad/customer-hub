@@ -2,6 +2,7 @@ package ad.lotfiz.assignment.customerhub.service;
 
 import ad.lotfiz.assignment.customerhub.RandomGenerator;
 import ad.lotfiz.assignment.customerhub.exception.CustomerNotFoundException;
+import ad.lotfiz.assignment.customerhub.exception.FieldNotFoundException;
 import ad.lotfiz.assignment.customerhub.model.CustomerEntity;
 import ad.lotfiz.assignment.customerhub.repository.CustomerRepository;
 import ad.lotfiz.assignment.customerhub.service.mapper.CustomerMapper;
@@ -77,6 +78,14 @@ public class CustomerServiceTest {
         verify(customerRepository).save(entityCaptor.capture());
         assertEquals(customerRequest.getFirstName(), entityCaptor.getValue().getFirstName());
         assertEquals(customerRequest.getLastName(), entityCaptor.getValue().getLastName());
+    }
+    @Test
+    void testCreateNewCustomer_mandatory_fields() {
+        // Given
+        CustomerRequest customerRequest = randomCustomerRequest().address("").email("");
+
+        // When
+        assertThrows(FieldNotFoundException.class, () -> customerService.createNewCustomer(customerRequest));
     }
 
 

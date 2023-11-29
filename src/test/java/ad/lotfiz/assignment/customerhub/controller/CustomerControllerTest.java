@@ -2,6 +2,7 @@ package ad.lotfiz.assignment.customerhub.controller;
 
 import ad.lotfiz.assignment.customerhub.RandomGenerator;
 import ad.lotfiz.assignment.customerhub.exception.CustomerNotFoundException;
+import ad.lotfiz.assignment.customerhub.exception.FieldNotFoundException;
 import ad.lotfiz.assignment.customerhub.service.CustomerService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.customerhub.api.v1.model.CustomerListResponse;
@@ -82,6 +83,27 @@ public class CustomerControllerTest {
         // Then
         verify(customerService, times(0)).createNewCustomer(any(CustomerRequest.class));
     }
+
+    @Test
+    void testCreateNewCustomer_mandatory_fields() throws Exception {
+        // Given
+        CustomerRequest request = randomCustomerRequest().email("").address("");
+
+        // Mocking the behavior of CustomerService to throw a DataIntegrityViolationException
+        when(customerService.createNewCustomer(any(CustomerRequest.class)))
+                .thenThrow(new FieldNotFoundException("Either Address or email should be provided"));
+
+        // When
+        mockMvc.perform(MockMvcRequestBuilders.post("/customers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+
+        // Then
+        verify(customerService, times(1)).createNewCustomer(any(CustomerRequest.class));
+
+    }
+
     @Test
     void testCreateNewCustomer_invalid_large_age() throws Exception {
         // Given
@@ -116,7 +138,7 @@ public class CustomerControllerTest {
     @Test
     void testCreateNewCustomer_unique_constraint_fails() throws Exception {
         // Given
-        CustomerRequest request = new CustomerRequest("John", "Doe").age(25).address("123 Main St").email("john.doe@example.com");
+        CustomerRequest request = randomCustomerRequest();
 
         // Mocking the behavior of CustomerService to throw a DataIntegrityViolationException
         when(customerService.createNewCustomer(any(CustomerRequest.class)))

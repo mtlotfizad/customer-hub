@@ -2,10 +2,12 @@ package ad.lotfiz.assignment.customerhub.controller.advice;
 
 
 import ad.lotfiz.assignment.customerhub.exception.CustomerNotFoundException;
+import ad.lotfiz.assignment.customerhub.exception.FieldNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import nl.customerhub.api.v1.model.DuplicateError;
 import nl.customerhub.api.v1.model.ErrorFieldIsInvalid;
+import nl.customerhub.api.v1.model.ErrorFieldIsRequired;
 import nl.customerhub.api.v1.model.NotFoundError;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -42,6 +44,14 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorFieldIsInvalid().message(ex.getMessage()));
+    }
+
+    @ExceptionHandler(FieldNotFoundException.class)
+    public ResponseEntity<ErrorFieldIsRequired> handleException(FieldNotFoundException ex) {
+        log.debug("customer service encounter an exception", ex);
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorFieldIsRequired().message(ex.getMessage()));
     }
 
 }

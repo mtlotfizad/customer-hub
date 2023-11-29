@@ -1,6 +1,7 @@
 package ad.lotfiz.assignment.customerhub.service;
 
 import ad.lotfiz.assignment.customerhub.exception.CustomerNotFoundException;
+import ad.lotfiz.assignment.customerhub.exception.FieldNotFoundException;
 import ad.lotfiz.assignment.customerhub.model.CustomerEntity;
 import ad.lotfiz.assignment.customerhub.repository.CustomerRepository;
 import ad.lotfiz.assignment.customerhub.service.mapper.CustomerMapper;
@@ -9,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import nl.customerhub.api.v1.model.CustomerListResponse;
 import nl.customerhub.api.v1.model.CustomerRequest;
 import nl.customerhub.api.v1.model.CustomerResponse;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +31,7 @@ public class CustomerService {
     private final CustomerRepository customerRepository;
 
     public CustomerResponse createNewCustomer(CustomerRequest customerRequest) {
+        validateMandatoryFields(customerRequest);
         CustomerEntity customerEntity = customerMapper.mapFromCustomerRequest(customerRequest);
         try {
             customerEntity.setCreated(OffsetDateTime.now());
@@ -39,6 +42,12 @@ public class CustomerService {
         } catch (DataIntegrityViolationException e) {
             log.error("Create customer failed: {}", customerRequest, e);
             throw e;
+        }
+    }
+
+    private static void validateMandatoryFields(CustomerRequest customerRequest) {
+        if (Strings.isEmpty(customerRequest.getAddress()) && Strings.isEmpty(customerRequest.getEmail())) {
+            throw new FieldNotFoundException("Either Address or email should be provided");
         }
     }
 
