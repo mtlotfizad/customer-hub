@@ -9,12 +9,17 @@ import nl.customerhub.api.v1.model.CustomerRequest;
 import nl.customerhub.api.v1.model.CustomerResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
+import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -26,6 +31,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.springframework.test.util.AssertionErrors.assertTrue;
 
 @SpringBootTest
 public class CustomerServiceIT {
@@ -41,9 +49,10 @@ public class CustomerServiceIT {
 
 
     @BeforeEach
-    public void cleanUpDatabase(){
+    public void cleanUpDatabase() {
         customerRepository.deleteAll();
     }
+
     @Test
     void testCreateNewCustomer_happy_flow() {
         // Given
@@ -220,5 +229,60 @@ public class CustomerServiceIT {
         assertEquals(lastNameToSearch, response.getLastName());
     }
 
+    @Test
+    void testUpdateCustomer() {
+        // Given
+        CustomerEntity existingCustomer = randomCustomerEntity();
+        customerRepository.save(existingCustomer);
+
+        CustomerRequest updatedRequest = randomCustomerRequest();
+
+        // When
+        CustomerResponse result = customerService.update(existingCustomer.getId().toString(), updatedRequest);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(existingCustomer.getId().toString(), result.getId());
+        assertEquals(updatedRequest.getFirstName(), result.getFirstName());
+        assertEquals(updatedRequest.getLastName(), result.getLastName());
+        assertEquals(updatedRequest.getAge(), result.getAge());
+        assertEquals(updatedRequest.getAddress(), result.getAddress());
+        assertEquals(updatedRequest.getEmail(), result.getEmail());
+        assertNotNull(result.getUpdated());
+        OffsetDateTime currentTime = OffsetDateTime.now();
+        Duration acceptableTimeDifference = Duration.ofSeconds(5);
+        assertTrue("Updated time should be near the current time",
+                Math.abs(Duration.between(result.getUpdated(), currentTime).getSeconds()) <= acceptableTimeDifference.getSeconds());
+    }
+
+    @Test
+    void testUpdateCustomer_duplicate_constraint_fails() {
+        // Given
+        CustomerEntity existingCustomer1 = randomCustomerEntity("John", "Doe");
+        CustomerEntity existingCustomer2 = randomCustomerEntity("Jane", "Doe");
+        customerRepository.saveAll(Arrays.asList(existingCustomer1, existingCustomer2));
+
+        CustomerRequest updatedRequest = new CustomerRequest()
+                .firstName("Jane") // Attempt to update with a duplicate firstName
+                .lastName("Doe")
+                .age(30)
+                .address("UpdatedAddress")
+                .email("updated.email@example.com");
+
+        // When and Then
+        assertThrows(DataIntegrityViolationException.class,
+                () -> customerService.update(existingCustomer1.getId().toString(), updatedRequest));
+    }
+
+    @Test
+    void testUpdateCustomer_customer_not_found() {
+        // Given
+        String nonExistingCustomerId = UUID.randomUUID().toString();
+        CustomerRequest updatedRequest = randomCustomerRequest();
+
+        // When and Then
+        assertThrows(CustomerNotFoundException.class,
+                () -> customerService.update(nonExistingCustomerId, updatedRequest));
+    }
 
 }
