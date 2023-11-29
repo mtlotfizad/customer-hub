@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>eu.mohsenlzd</groupId>
-    <artifactId>customer-data</artifactId>
+    <artifactId>customer-hub</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>customer-hub</name>
     <description>I want to be able to maintain customer data So that we can use that data in our other applications
