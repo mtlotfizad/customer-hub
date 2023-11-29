@@ -29,7 +29,6 @@ import static ad.lotfiz.assignment.customerhub.RandomGenerator.mapEntityToRespon
 import static ad.lotfiz.assignment.customerhub.RandomGenerator.mapRequestToEntity;
 import static ad.lotfiz.assignment.customerhub.RandomGenerator.randomCustomerEntity;
 import static ad.lotfiz.assignment.customerhub.RandomGenerator.randomCustomerRequest;
-import static ad.lotfiz.assignment.customerhub.RandomGenerator.randomCustomerResponse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -223,7 +222,7 @@ public class CustomerServiceTest {
                 randomCustomerEntity(firstName + "2", lastName + "2")
         );
         Page<CustomerEntity> mockedPage = new PageImpl<>(mockedEntities, paging, mockedEntities.size());
-        when(customerRepository.findByFirstNameAndLastName(firstName, lastName, paging)).thenReturn(mockedPage);
+        when(customerRepository.findByFirstNameLikeAndLastNameLike(firstName, lastName, paging)).thenReturn(mockedPage);
 
         // Mocking the behavior of CustomerMapper
         List<CustomerResponse> mockedResponses = mockedEntities
@@ -244,7 +243,7 @@ public class CustomerServiceTest {
         assertEquals(mockedResponses, result.getContent());
 
         // Verify that the repository's findByFirstNameAndLastName method was called with the correct arguments
-        verify(customerRepository, times(1)).findByFirstNameAndLastName(firstName, lastName, paging);
+        verify(customerRepository, times(1)).findByFirstNameLikeAndLastNameLike(firstName, lastName, paging);
 
         // Verify that the mapper's mapFromCustomerEntity method was called for each entity
         verify(customerMapper, times(mockedEntities.size())).mapFromCustomerEntity(any());

@@ -10,6 +10,5 @@ import java.util.UUID;
 
 @Repository
 public interface CustomerRepository  extends JpaRepository<CustomerEntity, UUID> {
-    Page<CustomerEntity> findByFirstNameAndLastName(String firstName, String lastName, Pageable paging);
-
+    Page<CustomerEntity> findByFirstNameLikeAndLastNameLike(String firstName, String lastName, Pageable paging);
 }

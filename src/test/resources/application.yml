@@ -4,5 +4,7 @@ spring:
     url: jdbc:h2:mem:testdb
     username: sa
     password: password
+
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
+    show-sql: true

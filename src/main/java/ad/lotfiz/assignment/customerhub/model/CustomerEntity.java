@@ -1,5 +1,6 @@
 package ad.lotfiz.assignment.customerhub.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -10,9 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
@@ -37,9 +36,9 @@ public class CustomerEntity {
     private Integer age;
     private String address;
     private String email;
-    @NonNull
+    @Column(nullable = false)
     private OffsetDateTime created;
-    @NonNull
+    @Column(nullable = false)
     private OffsetDateTime updated;
 
 }

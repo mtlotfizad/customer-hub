@@ -14,7 +14,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -29,6 +31,8 @@ public class CustomerService {
     public CustomerResponse createNewCustomer(CustomerRequest customerRequest) {
         CustomerEntity customerEntity = customerMapper.mapFromCustomerRequest(customerRequest);
         try {
+            customerEntity.setCreated(OffsetDateTime.now());
+            customerEntity.setUpdated(OffsetDateTime.now());
             CustomerEntity saved = customerRepository.save(customerEntity);
 
             return customerMapper.mapFromCustomerEntity(saved);
@@ -60,7 +64,10 @@ public class CustomerService {
     }
 
     public CustomerListResponse findByName(String firstName, String lastName, Pageable paging) {
-        Page<CustomerEntity> customerEntities = customerRepository.findByFirstNameAndLastName(firstName, lastName, paging);
+        firstName = "%" + Optional.ofNullable(firstName).orElse("") + "%";
+        lastName = "%" + Optional.ofNullable(lastName).orElse("") + "%";
+        Page<CustomerEntity> customerEntities = customerRepository
+                .findByFirstNameLikeAndLastNameLike(firstName, lastName, paging);
         List<CustomerResponse> customerResponses = customerEntities
                 .stream()
                 .map(customerMapper::mapFromCustomerEntity)
@@ -77,6 +84,7 @@ public class CustomerService {
         try {
             CustomerEntity existingCustomer = fetchOrThrow(customerId);
             updateCustomerEntity(existingCustomer, customerRequest);
+            existingCustomer.setUpdated(OffsetDateTime.now());
             CustomerEntity updatedCustomer = customerRepository.save(existingCustomer);
             return customerMapper.mapFromCustomerEntity(updatedCustomer);
         } catch (DataIntegrityViolationException e) {
