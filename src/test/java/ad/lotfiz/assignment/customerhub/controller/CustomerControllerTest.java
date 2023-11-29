@@ -82,6 +82,35 @@ public class CustomerControllerTest {
         // Then
         verify(customerService, times(0)).createNewCustomer(any(CustomerRequest.class));
     }
+    @Test
+    void testCreateNewCustomer_invalid_large_age() throws Exception {
+        // Given
+        CustomerRequest request = randomCustomerRequest().age(3000);
+
+        // When
+        mockMvc.perform(MockMvcRequestBuilders.post("/customers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.detail").value("Invalid request content."));
+        // Then
+        verify(customerService, times(0)).createNewCustomer(any(CustomerRequest.class));
+    }
+
+    @Test
+    void testCreateNewCustomer_invalid_negative_age() throws Exception {
+        // Given
+        CustomerRequest request = randomCustomerRequest().age(-2);
+
+        // When
+        mockMvc.perform(MockMvcRequestBuilders.post("/customers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.detail").value("Invalid request content."));
+        // Then
+        verify(customerService, times(0)).createNewCustomer(any(CustomerRequest.class));
+    }
 
 
     @Test

@@ -189,7 +189,6 @@ components:
         format: int32
         default: 0
         minimum: 0
-        maximum: 50
 
     Size:
       in: query
@@ -260,6 +259,8 @@ components:
           type: string
         age:
           type: integer
+          minimum: 1
+          maximum: 150
         address:
           type: string
         email:
