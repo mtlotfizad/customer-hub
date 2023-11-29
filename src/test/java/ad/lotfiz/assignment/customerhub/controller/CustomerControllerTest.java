@@ -1,6 +1,6 @@
 package ad.lotfiz.assignment.customerhub.controller;
 
-import ad.lotfiz.assignment.customerhub.model.CustomerEntity;
+import ad.lotfiz.assignment.customerhub.exception.CustomerNotFoundException;
 import ad.lotfiz.assignment.customerhub.service.CustomerService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.customerhub.api.v1.model.CustomerRequest;
@@ -19,12 +19,12 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @WebMvcTest(CustomerController.class)
 public class CustomerControllerTest {
 
@@ -79,6 +79,38 @@ public class CustomerControllerTest {
         // Then
         verify(customerService, times(1)).createNewCustomer(any(CustomerRequest.class));
     }
+
+    @Test
+    void testDeleteCustomer() throws Exception {
+        // Given
+        String customerId = "1";
+
+        // When
+        mockMvc.perform(MockMvcRequestBuilders.delete("/customers/{customerId}", customerId))
+                .andExpect(MockMvcResultMatchers.status().isNoContent());
+
+        // Then
+        verify(customerService, times(1)).delete(customerId);
+    }
+
+    @Test
+    void testDeleteCustomer_customer_not_found() throws Exception {
+        // Given
+        String customerId = "1";
+
+        // Mocking the behavior of CustomerService to throw a CustomerNotFoundException
+        doThrow(new CustomerNotFoundException("Customer not found"))
+                .when(customerService).delete(customerId);
+
+        // When
+        mockMvc.perform(MockMvcRequestBuilders.delete("/customers/{customerId}", customerId))
+                .andExpect(MockMvcResultMatchers.status().isNotFound())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Customer not found"));
+
+        // Then
+        verify(customerService, times(1)).delete(customerId);
+    }
+
 
     @Test
     void testHandleIllegalArgumentException() throws Exception {
