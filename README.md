@@ -17,7 +17,13 @@ A JVM based backend application using REST that manages customer hub system.
 This application is developed using [Api First](https://swagger.io/resources/articles/adopting-an-api-first-approach/) approach.
 the api is defined in [api.yaml](src/main/resources/api/customerHub-openapi-v1.yml) file and is used to generate the api contents using [open-api-generator](https://openapi-generator.tech/)
 
-## Local development
+## How to review
+1. Read the [api](src/main/resources/api/customerHub-openapi-v1.yml). There are 6 different endpoints introduced to cover the requirements. 
+2. You may like to review the code based on scenarios. Then I suggest you to start by [CustomerController.java](src/main/java/ad/lotfiz/assignment/customerhub/controller/CustomerController.java) and follow the logic.
+3. The core of the application is done by the service. You can find it [here](src/main/java/ad/lotfiz/assignment/customerhub/service/CustomerService.java)
+
+
+### Local development
 
 Full local development setup is available on this project.
 First, copy the `.env.dist` file to `.env` and configure it to your platform:
@@ -47,6 +53,7 @@ You may import them in your postman and use them to test the application.
 ### Running the tests
 Tests can be found [here](src/test/java/ad/lotfiz/assignment/customerhub). I developed unit + integration tests. The test coverage is 100%
 ![customerHub-test coverage.png](customerHub-test%20coverage.png)
+
 Tests are using H2 database, while the application is using MySql database.
 ./mvn test
 
