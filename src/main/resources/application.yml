@@ -1,0 +1,5 @@
+# no need to add connection info for the mysql. it's configured via spring-boot-docker-compose
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: update

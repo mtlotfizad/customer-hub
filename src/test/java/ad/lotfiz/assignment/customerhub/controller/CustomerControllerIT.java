@@ -204,7 +204,6 @@ public class CustomerControllerIT {
 
         // When
         String lastNameToSearch = "Doe";
-        Pageable paging = PageRequest.of(0, 10);
         String url = "/customers/find?lastName=" + lastNameToSearch + "&page=0&size=10";
         ResponseEntity<CustomerListResponse> getResponse = restTemplate.getForEntity(url, CustomerListResponse.class);
 
@@ -217,7 +216,6 @@ public class CustomerControllerIT {
         assertNotNull(body.getContent());
         assertThat(body.getContent().size()).isEqualTo(2);
         // Verify that the content matches the expected values
-        List<CustomerResponse> customerResponses = body.getContent();
 
         Assertions.assertThat(body.getContent().get(0))
                 .usingRecursiveComparison()
@@ -239,7 +237,7 @@ public class CustomerControllerIT {
         return restTemplate.exchange(url, HttpMethod.PUT, entity, classResponse);
     }
 
-    private <T, U> ResponseEntity<U> deleteEntity(String url, Class<U> classResponse) {
+    private <U> ResponseEntity<U> deleteEntity(String url, Class<U> classResponse) {
 
         return restTemplate.exchange(url, HttpMethod.DELETE, null, classResponse);
     }
