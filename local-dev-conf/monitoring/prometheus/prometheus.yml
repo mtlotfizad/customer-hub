@@ -1,0 +1,27 @@
+# my global config
+global:
+  scrape_interval:     15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
+  evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
+
+# A scrape configuration
+scrape_configs:
+  # Here it's Prometheus itself.
+  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
+  - job_name: 'prometheus'
+
+    # metrics_path defaults to '/metrics'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'customer-hub-service'
+    metrics_path: /actuator/prometheus
+    static_configs:
+      # Assuming you run Spring Boot apps on the Docker host on port 7777!
+      - targets: ['host.docker.internal:7777']
+
+# you may add other jobs as needed
+#  - job_name: 'another-stream-service'
+#    metrics_path: /actuator/prometheus
+#    static_configs:
+#      # Assuming you run Spring Boot apps on the Docker host on port 8080!
+#      - targets: ['host.docker.internal:8080']

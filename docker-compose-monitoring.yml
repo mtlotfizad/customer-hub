@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  # https://registry.hub.docker.com/r/prom/prometheus
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus:v2.35.0
+    platform: ${PLATFORM}
+    ports:
+      - 9090:9090
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - customerHub-platform-network-proxy
+    command:
+      # Enable to refresh the configuration using the reload endpoint http://localhost:9090/-/reload
+      - '--web.enable-lifecycle'
+      # We need to pass all the other command flags as well
+      # See: https://github.com/prometheus/prometheus/blob/b4317768b9476ee09a770c5dac6d826a8e7000f2/Dockerfile#L23-L26
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries --web.console.templates=/usr/share/prometheus/consoles'
+    volumes:
+      - ./local-dev-conf/monitoring/prometheus/:/etc/prometheus/
+
+  grafana:
+    image: grafana/grafana:8.2.5
+    container_name: grafana
+    platform: ${PLATFORM}
+    ports:
+      - 3000:3000
+    networks:
+      - customerHub-platform-network-proxy
+    environment:
+      # Disable Authentication use in your development environment only!
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_AUTH_DISABLE_LOGIN_FORM: "true"
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: "Admin"
+    volumes:
+      - ./local-dev-conf/monitoring/grafana/provisioning/:/etc/grafana/provisioning/
+      - ./local-dev-conf/monitoring/grafana/dashboards/:/etc/grafana/dashboards/
+    depends_on:
+      - prometheus
+
+networks:
+  customerHub-platform-network-proxy:
+    external:
+      name: streaming-platform-network
