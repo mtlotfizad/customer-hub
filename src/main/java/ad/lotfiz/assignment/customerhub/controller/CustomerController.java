@@ -61,9 +61,11 @@ public class CustomerController implements CustomerCrudApi {
     }
 
     @Override
-    public ResponseEntity<CustomerListResponse> findCustomer(String firstName, String lastName) {
-        log.info("find a list of customer firstName: {} lastName {}", firstName, lastName);
-        Pageable paging = customerService.findByName(firstName, lastName);
-        return ResponseEntity.ok(customerService.list(paging));
+    public ResponseEntity<CustomerListResponse> findCustomer(String firstName, String lastName, Integer page, Integer size) {
+        Pageable paging = PageRequest.of(page, size);
+
+        log.info("find a list of customer firstName: {} lastName {} at page:{}", firstName, lastName, paging);
+        var response = customerService.findByName(firstName, lastName, paging);
+        return ResponseEntity.ok(response);
     }
 }

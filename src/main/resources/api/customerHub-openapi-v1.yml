@@ -141,6 +141,8 @@ paths:
       parameters:
         - $ref: "#/components/parameters/FirstName"
         - $ref: "#/components/parameters/LastName"
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
       responses:
         '200':
           description: Returns a list of matching customers
@@ -262,6 +264,8 @@ components:
           type: string
         email:
           type: string
+          format: email
+          example: user@example.com
 
     CustomerResponse:
       type: object

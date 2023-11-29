@@ -48,7 +48,7 @@ public class CustomerService {
         return null;
     }
 
-    public Pageable findByName(String firstName, String lastName) {
+    public CustomerListResponse findByName(String firstName, String lastName, Pageable paging) {
         return null;
     }
 
