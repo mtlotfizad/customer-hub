@@ -3,15 +3,11 @@ package ad.lotfiz.assignment.customerhub.service;
 import ad.lotfiz.assignment.customerhub.exception.CustomerNotFoundException;
 import ad.lotfiz.assignment.customerhub.model.CustomerEntity;
 import ad.lotfiz.assignment.customerhub.repository.CustomerRepository;
-import ad.lotfiz.assignment.customerhub.service.mapper.CustomerMapper;
 import nl.customerhub.api.v1.model.CustomerListResponse;
 import nl.customerhub.api.v1.model.CustomerRequest;
 import nl.customerhub.api.v1.model.CustomerResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
-import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -31,15 +27,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
 
 @SpringBootTest
 public class CustomerServiceIT {
 
-    @Autowired
-    private CustomerMapper customerMapper;
 
     @Autowired
     private CustomerRepository customerRepository;
