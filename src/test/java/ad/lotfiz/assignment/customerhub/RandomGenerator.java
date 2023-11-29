@@ -17,15 +17,17 @@ public class RandomGenerator {
         return RandomStringUtils.randomAlphabetic(nameLength);
     }
 
-    public static CustomerEntity staticCustomerEntity() {
-        UUID id = UUID.randomUUID();
-        return new CustomerEntity(id, "John", "Doe", 25, "123 Main St", "john.doe@example.com");
-    }
-
     public static CustomerEntity randomCustomerEntity() {
         UUID id = UUID.randomUUID();
-        return new CustomerEntity(id, randomString(), randomString(),
-                randomAge(), randomString(), randomEmail());
+        return CustomerEntity.builder().id(id)
+                .firstName(randomString())
+                .lastName(randomString())
+                .address(randomString())
+                .age(randomAge())
+                .email(randomEmail())
+                .created(OffsetDateTime.now().minusDays(1))
+                .updated(OffsetDateTime.now())
+                .build();
     }
 
     private static String randomEmail() {
@@ -60,6 +62,18 @@ public class RandomGenerator {
                 .updated(OffsetDateTime.now());
     }
 
+    public static CustomerResponse randomCustomerResponse(CustomerEntity entity) {
+        return new CustomerResponse()
+                .id(entity.getId().toString())
+                .firstName(entity.getFirstName())
+                .lastName(entity.getLastName())
+                .address(entity.getAddress())
+                .age(entity.getAge())
+                .email(entity.getEmail())
+                .created(entity.getCreated())
+                .updated(entity.getUpdated());
+    }
+
     public static CustomerRequest randomCustomerRequest() {
         return new CustomerRequest()
                 .firstName(randomString())
@@ -68,4 +82,21 @@ public class RandomGenerator {
                 .address(randomString())
                 .email(randomEmail());
     }
+
+    public static CustomerEntity randomCustomerEntity(CustomerRequest request) {
+        UUID id = UUID.randomUUID();
+
+        return CustomerEntity.builder()
+                .id(id)
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
+                .address(request.getAddress())
+                .age(request.getAge())
+                .email(request.getEmail())
+                .created(OffsetDateTime.now().minusDays(1))
+                .updated(OffsetDateTime.now())
+                .build();
+
+    }
+
 }

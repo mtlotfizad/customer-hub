@@ -16,6 +16,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
+import static ad.lotfiz.assignment.customerhub.RandomGenerator.randomCustomerEntity;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -40,7 +41,7 @@ public class CustomerServiceIT {
         // Given
         CustomerRequest customerRequest = new CustomerRequest("John", "Doe").age(25).address("123 Main St").email("john.doe@example.com");
         UUID id = UUID.randomUUID();
-        CustomerEntity testEntity = new CustomerEntity(id, "John", "Doe", 25, "123 Main St", "john.doe@example.com");
+        CustomerEntity testEntity = randomCustomerEntity();
         customerRepository.save(testEntity);
 
         // When

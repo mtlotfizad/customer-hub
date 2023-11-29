@@ -7,9 +7,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Entity
@@ -22,6 +26,7 @@ import java.util.UUID;
 )
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class CustomerEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -32,5 +37,9 @@ public class CustomerEntity {
     private Integer age;
     private String address;
     private String email;
+    @NonNull
+    private OffsetDateTime created;
+    @NonNull
+    private OffsetDateTime updated;
 
 }
