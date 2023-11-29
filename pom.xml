@@ -15,7 +15,7 @@
     <description>I want to be able to maintain customer data So that we can use that data in our other applications
     </description>
     <properties>
-        <java.version>21</java.version>
+        <java.version>17</java.version>
         <jkube.version>1.14.0</jkube.version>
         <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
         <mapstruct.version>1.4.2.Final</mapstruct.version>
