@@ -1,4 +1,4 @@
-name: Build and Publish maktab-online Image
+name: Build and Publish Customer Hub Image
 on:
   push:
     branches:
