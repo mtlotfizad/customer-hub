@@ -97,7 +97,7 @@ A very simple dashboard which counts the number of new customer creation can be 
 Continuous integration is done using github actions. you can find the pipeline [here](.github/workflows/continuous-integration.yml) and [here](/.github/workflows/continuous-delivery.yml) and see it in action [here](https://github.com/mtlotfizad/customer-hub/actions)
 
 ### Images
-After build the images of the project will be available in the docker hub [here](https://hub.docker.com/r/mohsenlzd/customer-data)
+After build the images of the project will be available in the docker hub [here](https://hub.docker.com/r/mohsenlzd/customer-hub/tags)
 
 
 
