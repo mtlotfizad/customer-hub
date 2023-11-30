@@ -39,3 +39,4 @@ jobs:
 
       - name: Push docker image with Maven
         run: mvn k8s:push -Djkube.generator=docker.io/mohsenlzd/customer-hub/%a:%v
+
