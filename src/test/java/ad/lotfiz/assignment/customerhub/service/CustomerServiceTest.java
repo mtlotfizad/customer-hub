@@ -9,6 +9,7 @@ import ad.lotfiz.assignment.customerhub.service.mapper.CustomerMapper;
 import nl.customerhub.api.v1.model.CustomerListResponse;
 import nl.customerhub.api.v1.model.CustomerRequest;
 import nl.customerhub.api.v1.model.CustomerResponse;
+import nl.customerhub.api.v1.model.CustomerUpdateRequest;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
@@ -30,6 +31,7 @@ import static ad.lotfiz.assignment.customerhub.RandomGenerator.mapEntityToRespon
 import static ad.lotfiz.assignment.customerhub.RandomGenerator.mapRequestToEntity;
 import static ad.lotfiz.assignment.customerhub.RandomGenerator.randomCustomerEntity;
 import static ad.lotfiz.assignment.customerhub.RandomGenerator.randomCustomerRequest;
+import static ad.lotfiz.assignment.customerhub.RandomGenerator.randomCustomerUpdateRequest;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -262,18 +264,18 @@ public class CustomerServiceTest {
     @Test
     void testUpdateCustomer_happy_flow() {
         // Given
-        CustomerRequest customerRequest = randomCustomerRequest();
+        CustomerUpdateRequest updateRequest = randomCustomerUpdateRequest();
         CustomerEntity existingCustomer = randomCustomerEntity();
         UUID customerId = existingCustomer.getId();
-        CustomerEntity updatedCustomer = mapRequestToEntity(customerRequest);
-        CustomerResponse expectedResponse = mapEntityToResponse(updatedCustomer);
+        CustomerResponse expectedResponse = mapEntityToResponse(existingCustomer)
+                .address(updateRequest.getAddress()).email(updateRequest.getEmail());
 
         when(customerRepository.findById(customerId)).thenReturn(Optional.of(existingCustomer));
-        when(customerRepository.save(any(CustomerEntity.class))).thenReturn(updatedCustomer);
-        when(customerMapper.mapFromCustomerEntity(updatedCustomer)).thenReturn(expectedResponse);
+        when(customerRepository.save(any(CustomerEntity.class))).thenReturn(existingCustomer);
+        when(customerMapper.mapFromCustomerEntity(any())).thenReturn(expectedResponse);
 
         // When
-        CustomerResponse result = customerService.update(customerId.toString(), customerRequest);
+        CustomerResponse result = customerService.update(customerId.toString(), updateRequest);
 
         // Then
         assertNotNull(result);
@@ -282,38 +284,9 @@ public class CustomerServiceTest {
         // Verify that the repository's save method was called with the correct argument
         ArgumentCaptor<CustomerEntity> entityCaptor = ArgumentCaptor.forClass(CustomerEntity.class);
         verify(customerRepository).save(entityCaptor.capture());
-        assertEquals(customerRequest.getFirstName(), entityCaptor.getValue().getFirstName());
-        assertEquals(customerRequest.getLastName(), entityCaptor.getValue().getLastName());
 
         // Verify that the fetchOrThrow method was called with the correct argument
         verify(customerRepository, times(1)).findById(customerId);
     }
 
-    @Test
-    void testUpdateCustomer_duplicate_data_exception() {
-        // Given
-        UUID customerId = UUID.randomUUID();
-        CustomerRequest customerRequest = randomCustomerRequest();
-        CustomerEntity existingCustomer = randomCustomerEntity();
-
-        when(customerRepository.findById(customerId)).thenReturn(Optional.ofNullable(existingCustomer));
-        when(customerRepository.save(any(CustomerEntity.class)))
-                .thenThrow(new DataIntegrityViolationException("Duplicate entry"));
-
-        // When and Then
-        DataIntegrityViolationException thrownException = assertThrows(DataIntegrityViolationException.class,
-                () -> customerService.update(customerId.toString(), customerRequest));
-
-        // Verify the exception message
-        assertEquals("Duplicate entry", thrownException.getMessage());
-
-        // Verify that the fetchOrThrow method was called with the correct argument
-        verify(customerRepository, times(1)).findById(customerId);
-
-        // Verify that the repository's save method was called with the correct argument
-        ArgumentCaptor<CustomerEntity> entityCaptor = ArgumentCaptor.forClass(CustomerEntity.class);
-        verify(customerRepository).save(entityCaptor.capture());
-        assertEquals(customerRequest.getFirstName(), entityCaptor.getValue().getFirstName());
-        assertEquals(customerRequest.getLastName(), entityCaptor.getValue().getLastName());
-    }
 }

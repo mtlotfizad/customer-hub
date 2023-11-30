@@ -6,6 +6,7 @@ import ad.lotfiz.assignment.customerhub.repository.CustomerRepository;
 import nl.customerhub.api.v1.model.CustomerListResponse;
 import nl.customerhub.api.v1.model.CustomerRequest;
 import nl.customerhub.api.v1.model.CustomerResponse;
+import nl.customerhub.api.v1.model.CustomerUpdateRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,7 @@ import java.util.UUID;
 import static ad.lotfiz.assignment.customerhub.RandomGenerator.mapRequestToEntity;
 import static ad.lotfiz.assignment.customerhub.RandomGenerator.randomCustomerEntity;
 import static ad.lotfiz.assignment.customerhub.RandomGenerator.randomCustomerRequest;
+import static ad.lotfiz.assignment.customerhub.RandomGenerator.randomCustomerUpdateRequest;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -227,7 +229,7 @@ public class CustomerServiceIT {
         CustomerEntity existingCustomer = randomCustomerEntity();
         customerRepository.save(existingCustomer);
 
-        CustomerRequest updatedRequest = randomCustomerRequest();
+        CustomerUpdateRequest updatedRequest = randomCustomerUpdateRequest();
 
         // When
         CustomerResponse result = customerService.update(existingCustomer.getId().toString(), updatedRequest);
@@ -235,9 +237,9 @@ public class CustomerServiceIT {
         // Then
         assertNotNull(result);
         assertEquals(existingCustomer.getId().toString(), result.getId());
-        assertEquals(updatedRequest.getFirstName(), result.getFirstName());
-        assertEquals(updatedRequest.getLastName(), result.getLastName());
-        assertEquals(updatedRequest.getAge(), result.getAge());
+        assertEquals(existingCustomer.getFirstName(), result.getFirstName());
+        assertEquals(existingCustomer.getLastName(), result.getLastName());
+        assertEquals(existingCustomer.getAge(), result.getAge());
         assertEquals(updatedRequest.getAddress(), result.getAddress());
         assertEquals(updatedRequest.getEmail(), result.getEmail());
         assertNotNull(result.getUpdated());
@@ -248,29 +250,10 @@ public class CustomerServiceIT {
     }
 
     @Test
-    void testUpdateCustomer_duplicate_constraint_fails() {
-        // Given
-        CustomerEntity existingCustomer1 = randomCustomerEntity("John", "Doe");
-        CustomerEntity existingCustomer2 = randomCustomerEntity("Jane", "Doe");
-        customerRepository.saveAll(Arrays.asList(existingCustomer1, existingCustomer2));
-
-        CustomerRequest updatedRequest = new CustomerRequest()
-                .firstName("Jane") // Attempt to update with a duplicate firstName
-                .lastName("Doe")
-                .age(30)
-                .address("UpdatedAddress")
-                .email("updated.email@example.com");
-
-        // When and Then
-        assertThrows(DataIntegrityViolationException.class,
-                () -> customerService.update(existingCustomer1.getId().toString(), updatedRequest));
-    }
-
-    @Test
     void testUpdateCustomer_customer_not_found() {
         // Given
         String nonExistingCustomerId = UUID.randomUUID().toString();
-        CustomerRequest updatedRequest = randomCustomerRequest();
+        CustomerUpdateRequest updatedRequest = randomCustomerUpdateRequest();
 
         // When and Then
         assertThrows(CustomerNotFoundException.class,

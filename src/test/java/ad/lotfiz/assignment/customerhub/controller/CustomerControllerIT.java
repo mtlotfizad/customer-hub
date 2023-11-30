@@ -4,8 +4,8 @@ import ad.lotfiz.assignment.customerhub.model.CustomerEntity;
 import ad.lotfiz.assignment.customerhub.repository.CustomerRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.customerhub.api.v1.model.CustomerListResponse;
-import nl.customerhub.api.v1.model.CustomerRequest;
 import nl.customerhub.api.v1.model.CustomerResponse;
+import nl.customerhub.api.v1.model.CustomerUpdateRequest;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -21,13 +21,18 @@ import org.springframework.http.ResponseEntity;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+import static ad.lotfiz.assignment.customerhub.RandomGenerator.mapEntityToResponse;
 import static ad.lotfiz.assignment.customerhub.RandomGenerator.randomCustomerEntity;
 import static ad.lotfiz.assignment.customerhub.RandomGenerator.randomCustomerRequest;
+import static ad.lotfiz.assignment.customerhub.RandomGenerator.randomCustomerUpdateRequest;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -168,7 +173,7 @@ public class CustomerControllerIT {
         // Given
         CustomerEntity existingCustomer = randomCustomerEntity();
         CustomerEntity entity = customerRepository.save(existingCustomer);
-        CustomerRequest updatedRequest = randomCustomerRequest();
+        CustomerUpdateRequest updatedRequest = randomCustomerUpdateRequest();
 
         // When
         String url = String.format(ONE_CUSTOMER_PATH, entity.getId().toString());
@@ -179,16 +184,26 @@ public class CustomerControllerIT {
         CustomerResponse body = response.getBody();
         assertNotNull(body);
 
+        CustomerResponse expectedResponse = mapEntityToResponse(entity).address(updatedRequest.getAddress()).email(updatedRequest.getEmail());
+
         Assertions.assertThat(body)
                 .usingRecursiveComparison()
                 .ignoringFieldsOfTypes(OffsetDateTime.class)
-                .ignoringFields("id")
-                .isEqualTo(updatedRequest);
+                .isEqualTo(expectedResponse);
+
+
+        Assertions.assertThat(body.getCreated())
+                .usingComparator(getCustomComparator())
+                .isEqualTo(expectedResponse.getCreated());
 
         OffsetDateTime currentTime = OffsetDateTime.now();
         Duration acceptableTimeDifference = Duration.ofSeconds(5);
         assertTrue("Updated time should be near the current time",
                 Math.abs(Duration.between(body.getUpdated(), currentTime).getSeconds()) <= acceptableTimeDifference.getSeconds());
+    }
+
+    private static Comparator<OffsetDateTime> getCustomComparator() {
+        return Comparator.comparing((OffsetDateTime dt) -> dt.atZoneSameInstant(ZoneId.of("UTC")).toOffsetDateTime());
     }
 
     @Test

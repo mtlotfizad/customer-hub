@@ -7,6 +7,7 @@ import nl.customerhub.api.v1.CustomerCrudApi;
 import nl.customerhub.api.v1.model.CustomerListResponse;
 import nl.customerhub.api.v1.model.CustomerRequest;
 import nl.customerhub.api.v1.model.CustomerResponse;
+import nl.customerhub.api.v1.model.CustomerUpdateRequest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -54,9 +55,9 @@ public class CustomerController implements CustomerCrudApi {
     }
 
     @Override
-    public ResponseEntity<CustomerResponse> updateCustomer(String customerId, CustomerRequest customerRequest) {
-        log.info("updating the customer id {} with {}", customerId, customerRequest);
-        CustomerResponse response = customerService.update(customerId, customerRequest);
+    public ResponseEntity<CustomerResponse> updateCustomer(String customerId, CustomerUpdateRequest updateRequest) {
+        log.info("updating the customer id {} with {}", customerId, updateRequest);
+        CustomerResponse response = customerService.update(customerId, updateRequest);
         return ResponseEntity.ok(response);
     }
 

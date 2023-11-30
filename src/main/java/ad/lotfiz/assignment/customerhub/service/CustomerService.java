@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import nl.customerhub.api.v1.model.CustomerListResponse;
 import nl.customerhub.api.v1.model.CustomerRequest;
 import nl.customerhub.api.v1.model.CustomerResponse;
+import nl.customerhub.api.v1.model.CustomerUpdateRequest;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -42,12 +43,6 @@ public class CustomerService {
         } catch (DataIntegrityViolationException e) {
             log.error("Create customer failed: {}", customerRequest, e);
             throw e;
-        }
-    }
-
-    private static void validateMandatoryFields(CustomerRequest customerRequest) {
-        if (Strings.isEmpty(customerRequest.getAddress()) && Strings.isEmpty(customerRequest.getEmail())) {
-            throw new FieldNotFoundException("Either Address or email should be provided");
         }
     }
 
@@ -89,25 +84,18 @@ public class CustomerService {
         );
     }
 
-    public CustomerResponse update(String customerId, CustomerRequest customerRequest) {
-        try {
-            CustomerEntity existingCustomer = fetchOrThrow(customerId);
-            updateCustomerEntity(existingCustomer, customerRequest);
-            existingCustomer.setUpdated(OffsetDateTime.now());
-            CustomerEntity updatedCustomer = customerRepository.save(existingCustomer);
-            return customerMapper.mapFromCustomerEntity(updatedCustomer);
-        } catch (DataIntegrityViolationException e) {
-            log.error("Create customer failed: duplicate firstName, lastName? : {}", customerRequest, e);
-            throw e;
-        }
+    public CustomerResponse update(String customerId, CustomerUpdateRequest updateRequest) {
+        validateMandatoryFields(updateRequest);
+        CustomerEntity existingCustomer = fetchOrThrow(customerId);
+        updateCustomerEntity(existingCustomer, updateRequest);
+        existingCustomer.setUpdated(OffsetDateTime.now());
+        CustomerEntity updatedCustomer = customerRepository.save(existingCustomer);
+        return customerMapper.mapFromCustomerEntity(updatedCustomer);
     }
 
-    private void updateCustomerEntity(CustomerEntity customerEntity, CustomerRequest customerRequest) {
-        customerEntity.setFirstName(customerRequest.getFirstName());
-        customerEntity.setLastName(customerRequest.getLastName());
-        customerEntity.setAge(customerRequest.getAge());
-        customerEntity.setAddress(customerRequest.getAddress());
-        customerEntity.setEmail(customerRequest.getEmail());
+    private void updateCustomerEntity(CustomerEntity customerEntity, CustomerUpdateRequest updateRequest) {
+        customerEntity.setAddress(updateRequest.getAddress());
+        customerEntity.setEmail(updateRequest.getEmail());
     }
 
     private CustomerEntity fetchOrThrow(String id) {
@@ -115,5 +103,16 @@ public class CustomerService {
         return customerRepository.findById(uuid).orElseThrow(() -> new CustomerNotFoundException(String.format("Customer %s not found", id)));
     }
 
+    private static void validateMandatoryFields(CustomerRequest customerRequest) {
+        if (Strings.isEmpty(customerRequest.getAddress()) && Strings.isEmpty(customerRequest.getEmail())) {
+            throw new FieldNotFoundException("Either Address or email should be provided");
+        }
+    }
+
+    private static void validateMandatoryFields(CustomerUpdateRequest customerRequest) {
+        if (Strings.isEmpty(customerRequest.getAddress()) && Strings.isEmpty(customerRequest.getEmail())) {
+            throw new FieldNotFoundException("Either Address or email should be provided");
+        }
+    }
 
 }

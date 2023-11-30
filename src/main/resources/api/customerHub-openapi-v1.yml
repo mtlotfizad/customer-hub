@@ -96,7 +96,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CustomerRequest'
+              $ref: '#/components/schemas/CustomerUpdateRequest'
       responses:
         '200':
           description: Returns updated Customer details
@@ -261,6 +261,17 @@ components:
           type: integer
           minimum: 1
           maximum: 150
+        address:
+          type: string
+        email:
+          type: string
+          format: email
+          example: user@example.com
+
+    CustomerUpdateRequest:
+      type: object
+      description: Data for updating the customer (email/address)
+      properties:
         address:
           type: string
         email:

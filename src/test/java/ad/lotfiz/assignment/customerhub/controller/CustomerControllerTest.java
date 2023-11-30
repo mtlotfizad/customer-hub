@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.customerhub.api.v1.model.CustomerListResponse;
 import nl.customerhub.api.v1.model.CustomerRequest;
 import nl.customerhub.api.v1.model.CustomerResponse;
+import nl.customerhub.api.v1.model.CustomerUpdateRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -24,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static ad.lotfiz.assignment.customerhub.RandomGenerator.randomCustomerRequest;
+import static ad.lotfiz.assignment.customerhub.RandomGenerator.randomCustomerUpdateRequest;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doThrow;
@@ -282,9 +284,9 @@ public class CustomerControllerTest {
     void testUpdateCustomer() throws Exception {
         // Given
         String customerId = "1";
-        CustomerRequest updatedCustomerRequest = randomCustomerRequest();
+        CustomerUpdateRequest updatedCustomerRequest = randomCustomerUpdateRequest();
         CustomerResponse updatedCustomerResponse = RandomGenerator.randomCustomerResponse().id(customerId);
-        when(customerService.update(eq(customerId), any(CustomerRequest.class))).thenReturn(updatedCustomerResponse);
+        when(customerService.update(eq(customerId), any(CustomerUpdateRequest.class))).thenReturn(updatedCustomerResponse);
 
         // When
         mockMvc.perform(MockMvcRequestBuilders.put("/customers/{customerId}", customerId)
@@ -299,17 +301,17 @@ public class CustomerControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.email").value(updatedCustomerResponse.getEmail()));
 
         // Then
-        verify(customerService, times(1)).update(eq(customerId), any(CustomerRequest.class));
+        verify(customerService, times(1)).update(eq(customerId), any(CustomerUpdateRequest.class));
     }
 
     @Test
     void testUpdateCustomer_customer_not_found() throws Exception {
         // Given
         String customerId = "1";
-        CustomerRequest updatedCustomerRequest = randomCustomerRequest();
+        CustomerUpdateRequest updatedCustomerRequest = randomCustomerUpdateRequest();
 
         // Mocking the behavior of CustomerService to throw a CustomerNotFoundException
-        when(customerService.update(eq(customerId), any(CustomerRequest.class)))
+        when(customerService.update(eq(customerId), any(CustomerUpdateRequest.class)))
                 .thenThrow(new CustomerNotFoundException("Customer not found"));
 
         // When
@@ -320,7 +322,7 @@ public class CustomerControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Customer not found"));
 
         // Then
-        verify(customerService, times(1)).update(eq(customerId), any(CustomerRequest.class));
+        verify(customerService, times(1)).update(eq(customerId), any(CustomerUpdateRequest.class));
     }
 
 

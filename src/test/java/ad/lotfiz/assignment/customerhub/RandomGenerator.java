@@ -3,6 +3,7 @@ package ad.lotfiz.assignment.customerhub;
 import ad.lotfiz.assignment.customerhub.model.CustomerEntity;
 import nl.customerhub.api.v1.model.CustomerRequest;
 import nl.customerhub.api.v1.model.CustomerResponse;
+import nl.customerhub.api.v1.model.CustomerUpdateRequest;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 
@@ -79,6 +80,11 @@ public class RandomGenerator {
                 .firstName(randomString())
                 .lastName(randomString())
                 .age(randomAge())
+                .address(randomString())
+                .email(randomEmail());
+    }
+    public static CustomerUpdateRequest randomCustomerUpdateRequest() {
+        return new CustomerUpdateRequest()
                 .address(randomString())
                 .email(randomEmail());
     }
