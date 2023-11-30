@@ -11,7 +11,7 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks:
-      - customerHub-platform-network-proxy
+      - customerHub-platform-network
     command:
       # Enable to refresh the configuration using the reload endpoint http://localhost:9090/-/reload
       - '--web.enable-lifecycle'
@@ -30,7 +30,7 @@ services:
     ports:
       - 3000:3000
     networks:
-      - customerHub-platform-network-proxy
+      - customerHub-platform-network
     environment:
       # Disable Authentication use in your development environment only!
       GF_USERS_ALLOW_SIGN_UP: "false"
@@ -44,6 +44,6 @@ services:
       - prometheus
 
 networks:
-  customerHub-platform-network-proxy:
-    external:
-      name: streaming-platform-network
+  customerHub-platform-network:
+    name: customerHub-platform-network
+    driver: bridge

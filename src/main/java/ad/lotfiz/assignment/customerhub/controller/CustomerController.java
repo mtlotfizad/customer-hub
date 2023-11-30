@@ -1,6 +1,7 @@
 package ad.lotfiz.assignment.customerhub.controller;
 
 import ad.lotfiz.assignment.customerhub.service.CustomerService;
+import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import nl.customerhub.api.v1.CustomerCrudApi;
@@ -25,6 +26,7 @@ public class CustomerController implements CustomerCrudApi {
 
     private final CustomerService customerService;
 
+    @Timed
     @Override
     public ResponseEntity<CustomerResponse> createNewCustomer(CustomerRequest customerRequest) {
         log.info("Request to create customer {}", customerRequest);
@@ -33,6 +35,7 @@ public class CustomerController implements CustomerCrudApi {
         return ResponseEntity.created(location).body(response);
     }
 
+    @Timed
     @Override
     public ResponseEntity<Void> deleteCustomer(String customerId) {
         log.info("Request to delete a customer {}", customerId);
@@ -40,6 +43,7 @@ public class CustomerController implements CustomerCrudApi {
         return ResponseEntity.noContent().build();
     }
 
+    @Timed
     @Override
     public ResponseEntity<CustomerResponse> getCustomer(String customerId) {
         log.info("Request to get details of a customer {}", customerId);
@@ -47,6 +51,7 @@ public class CustomerController implements CustomerCrudApi {
         return ResponseEntity.ok(customerResponse);
     }
 
+    @Timed
     @Override
     public ResponseEntity<CustomerListResponse> listCustomers(Integer page, Integer size) {
         Pageable paging = PageRequest.of(page, size);
@@ -54,6 +59,7 @@ public class CustomerController implements CustomerCrudApi {
         return ResponseEntity.ok(customerService.list(paging));
     }
 
+    @Timed
     @Override
     public ResponseEntity<CustomerResponse> updateCustomer(String customerId, CustomerUpdateRequest updateRequest) {
         log.info("updating the customer id {} with {}", customerId, updateRequest);
@@ -61,6 +67,7 @@ public class CustomerController implements CustomerCrudApi {
         return ResponseEntity.ok(response);
     }
 
+    @Timed
     @Override
     public ResponseEntity<CustomerListResponse> findCustomer(String firstName, String lastName, Integer page, Integer size) {
         Pageable paging = PageRequest.of(page, size);

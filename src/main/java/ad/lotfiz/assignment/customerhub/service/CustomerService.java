@@ -5,6 +5,7 @@ import ad.lotfiz.assignment.customerhub.exception.FieldNotFoundException;
 import ad.lotfiz.assignment.customerhub.model.CustomerEntity;
 import ad.lotfiz.assignment.customerhub.repository.CustomerRepository;
 import ad.lotfiz.assignment.customerhub.service.mapper.CustomerMapper;
+import io.micrometer.core.annotation.Counted;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import nl.customerhub.api.v1.model.CustomerListResponse;
@@ -31,6 +32,7 @@ public class CustomerService {
     private final CustomerMapper customerMapper;
     private final CustomerRepository customerRepository;
 
+    @Counted
     public CustomerResponse createNewCustomer(CustomerRequest customerRequest) {
         validateMandatoryFields(customerRequest);
         CustomerEntity customerEntity = customerMapper.mapFromCustomerRequest(customerRequest);
@@ -46,15 +48,18 @@ public class CustomerService {
         }
     }
 
+    @Counted
     public void delete(String customerId) {
         customerRepository.delete(fetchOrThrow(customerId));
     }
 
+    @Counted
     public CustomerResponse fetchCustomer(String uuid) {
         return customerMapper.mapFromCustomerEntity(fetchOrThrow(uuid));
     }
 
 
+    @Counted
     public CustomerListResponse list(Pageable paging) {
         log.debug("Request to list all Student of page {}", paging);
 
@@ -67,6 +72,7 @@ public class CustomerService {
         return response;
     }
 
+    @Counted
     public CustomerListResponse findByName(String firstName, String lastName, Pageable paging) {
         firstName = "%" + Optional.ofNullable(firstName).orElse("") + "%";
         lastName = "%" + Optional.ofNullable(lastName).orElse("") + "%";
@@ -84,6 +90,7 @@ public class CustomerService {
         );
     }
 
+    @Counted
     public CustomerResponse update(String customerId, CustomerUpdateRequest updateRequest) {
         validateMandatoryFields(updateRequest);
         CustomerEntity existingCustomer = fetchOrThrow(customerId);

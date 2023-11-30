@@ -13,15 +13,9 @@ scrape_configs:
     static_configs:
       - targets: ['localhost:9090']
 
+# you may add other jobs as needed
   - job_name: 'customer-hub-service'
     metrics_path: /actuator/prometheus
     static_configs:
-      # Assuming you run Spring Boot apps on the Docker host on port 7777!
-      - targets: ['host.docker.internal:7777']
-
-# you may add other jobs as needed
-#  - job_name: 'another-stream-service'
-#    metrics_path: /actuator/prometheus
-#    static_configs:
-#      # Assuming you run Spring Boot apps on the Docker host on port 8080!
-#      - targets: ['host.docker.internal:8080']
+      # Assuming you run Spring Boot apps on the Docker host on port 8080!
+      - targets: ['host.docker.internal:8080']
