@@ -10,15 +10,15 @@ As a product owner I would like to be able to maintain customer data with the fo
   * The combination of {first-name, last-name} is unique.
   * Either address or email should be set.
 * I need some REST endpoints to 
-  * insert new user
-  * get a user by id
-  * delete a user
-  * update a user (only address and email)
+  * insert new user and return a UUID
+  * get a user by given UUID
+  * delete a user by given UUID
+  * update a user by given UUID (only address and email)
   * list all available users
   * search users based on first-name and last-name
 * No security is required for the REST endpoints.
 * I need some monitoring metrics to know the performance of the system
-* The application needs to be production ready (dockerized, pipeline)
+* The application needs to be production ready (pipeline)
 * The application needs to be one go.
 * The application should be able to run locally.
 
@@ -28,12 +28,19 @@ A JVM based backend application using REST that manages customer hub system.
 ## Tech Stack
 - Java 17
 - Spring Boot 3.2.0
-- Spring Data
+- Spring JPA
 - Mysql
 - H2 (only for tests)
 - Swagger (API First)
-- Docker
-- Prometheus and grafana
+- Docker-compose
+- Prometheus
+- Grafana
+- Mapstruct
+- Lombok
+- Open-api-generator
+- jkube (to dockerize and publish the image to docker-hub)
+
+
 ## Api First
 This application is developed using [Api First](https://swagger.io/resources/articles/adopting-an-api-first-approach/) approach.
 the api is defined in [api.yaml](src/main/resources/api/customerHub-openapi-v1.yml) file and is used to generate the api contents using [open-api-generator](https://openapi-generator.tech/)
