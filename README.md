@@ -96,12 +96,12 @@ If you also want to develop monitoring dashboards in grafana locally you can run
 
 Prometheus will by default run on: [http://localhost:9090](http://localhost:9090) and grafana by default [http://localhost:3000](http://localhost:3000)
 
-A very simple dashboard which counts the number of new customer creation can be found in the grafana. The Dashboard is loaded from [sample-dashboard.json](local-dev-conf%2Fmonitoring%2Fgrafana%2Fdashboards%2Fsample-dashboard.json)
+A very simple dashboard which counts the number of new customer creation can be found in the grafana. The Dashboard is loaded from [sample-dashboard.json](local-dev-conf/monitoring/grafana/dashboards/sample-dashboard.json)
 ![grafana.png](grafana.png)
 
 
 ## CI/CD
-Continuous integration is done using github actions. you can find the pipeline [here](.github/workflows/continuous-integration.yml) and [here](/.github/workflows/continuous-delivery.yml) and see it in action [here](https://github.com/mtlotfizad/customer-hub/actions)
+Continuous integration is done using github actions. you can find the pipeline [here](.github/workflows/continuous-integration.yml) and [here](.github/workflows/continuous-delivery.yml) and see it in action [here](https://github.com/mtlotfizad/customer-hub/actions)
 
 ### Images
 After build the images of the project will be available in the docker hub [here](https://hub.docker.com/r/mohsenlzd/customer-hub/tags)
