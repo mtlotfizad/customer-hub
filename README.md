@@ -1,3 +1,5 @@
+[![Coverage Status](https://img.shields.io/badge/coverage-90%25-brightgreen.svg)](https://github.com/mtlotfizad/customer-hub/actions/workflows/continuous-integration.yml)
+
 # Customer Hub
 This is a demo project of to store and retrieve customers data.
 
@@ -70,11 +72,9 @@ Postman collection is available [here](local-dev-conf/postman/postman_collection
 You may import them in your postman and use them to test the application.
 
 ### Running the tests
-Tests can be found [here](src/test/java/ad/lotfiz/assignment/customerhub). I developed unit + integration tests. The test coverage is 100%
-![customerHub-test coverage.png](customerHub-test%20coverage.png)
+Tests can be found [here](src/test/java/ad/lotfiz/assignment/customerhub). I developed unit + integration tests. Jacoco shows the coverage of the tests.
 
 Tests are using H2 database, while the application is using MySql database.
-./mvn test
 
 ## Monitoring
 
